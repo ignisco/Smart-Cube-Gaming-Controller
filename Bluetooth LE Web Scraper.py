@@ -21,52 +21,71 @@ driver = webdriver.Chrome(desired_capabilities=capabilities, executable_path=r'c
 html_location = os.path.dirname(os.path.abspath(__file__)) + "/index.html"
 driver.get(html_location)
 
-dic_go = {"U": "q",
-       "U'": "w",
-       "D": "e",
-       "D'": "r",
-       "R": "t",
-       "R'": "y",
-       "L": "u",
-       "L'": "i",
-       "F": "o",
-       "F'": "p",
-       "B": "a",
-       "B'": "s"
+class Key:
+    def __init__(self, value, toggle, press_length=0.1, cancel_keys=[]):
+        self.value = value
+        self.toggle = toggle
+        self.press_length = press_length
+        self.cancel_keys = cancel_keys
+
+down1 = Key("s", True, cancel_keys=["s", "g"])
+down2 = Key("k", True, cancel_keys=["i", "k"])
+
+dic_go = {"U": Key("a", True, cancel_keys=["a", "d"]),
+       "U'": Key("d", True, cancel_keys=["a", "d"]),
+       "D": down1,
+       "D'": down1,
+       "R": Key("g", False, press_length=0.1),
+       "R'": Key("g", False, press_length=0.1),
+       "L": Key("s", False, press_length=0.1),
+       "L'": Key("h", False, press_length=0.1),
+       "F": Key("f", False, press_length=0.1),
+       "F'": Key("f", False, press_length=0.1),
+       # "B": "a",
+       # "B'": "s"
        }
 
-dic_gi = {"U": "d",
-       "U'": "f",
-       "D": "g",
-       "D'": "h",
-       "R": "j",
-       "R'": "k",
-       "L": "l",
-       "L'": "z",
-       "F": "x",
-       "F'": "c",
-       "B": "v",
-       "B'": "b"
+dic_gi = {"U": Key("j", True, cancel_keys=["j", "l"]),
+       "U'": Key("l", True, cancel_keys=["j", "l"]),
+       "D": down2,
+       "D'": down2,
+       "R": Key("i", False, press_length=0.1),
+       "R'": Key("i", False, press_length=0.1),
+       "L": Key("k", False, press_length=0.1),
+       "L'": Key("n", False, press_length=0.1),
+       "F": Key("m", False, press_length=0.1),
+       "F'": Key("m", False, press_length=0.1),
+       # "B": "v",
+       # "B'": "b"ksa
        }
 
 dics = {"GO": dic_go, "GI": dic_gi}
 
 pressed_keys = {}
-press_length = 0.1
 
 def updateKeys():
     for key, val in pressed_keys.copy().items():
-        if time.time() > val + press_length:
-            keyboard.release(key)
-            del pressed_keys[key]
+        if not key.toggle:
+            if time.time() > val + key.press_length:
+                keyboard.release(key.value)
+                del pressed_keys[key]
 
 while True:
     for entry in driver.get_log('browser'):
         try:
             entry = str(entry).split('"')[1].split(";")
-            key = dics[entry[1]][entry[0].replace("\\", "")]
-            keyboard.press(key)
-            pressed_keys[key] = time.time()
+            new_key = dics[entry[1]][entry[0].replace("\\", "")]
+            old_pressed_keys = pressed_keys.copy()  # Used to prevent toggle key from toggling itself off immediately
+            pressed_keys[new_key] = time.time()
+
+            # Check if new_key is in cancel_keys of already toggled keys
+            for key in old_pressed_keys:
+                if new_key.value in key.cancel_keys:
+                    keyboard.release(key.value)
+                    del pressed_keys[key]
+
+            if new_key not in old_pressed_keys:
+                keyboard.press(new_key.value)
         except:
             pass
 
