@@ -73,15 +73,12 @@ var ganDecoder = null;
 
 
  function GoNotifications(event) {
-       var val = event.target.value;
-       var len = val.byteLength;
-       console.log(len)
-       console.log(val.getUint8(1))
-       console.log(val.getUint8(3))
-        try {
-            if (len = 8 && val.getUint8(1) /* payload len */ == 6) {
-              var turn = ["B", "B'", "F", "F'", "U", "U'", "D", "D'", "R", "R'", "L", "L'"][val.getUint8(3)];
-              console.log(turn + ";GO");
+      try {
+          var val = event.target.value;
+          var len = val.byteLength;
+          if (len = 8 && val.getUint8(1) /* payload len */ == 6) {
+            var turn = ["B", "B'", "F", "F'", "U", "U'", "D", "D'", "R", "R'", "L", "L'"][val.getUint8(3)];
+            console.log(turn + ";GO");
             }
         } catch (ex) {
             alert("ERROR (K): " + ex.message);
