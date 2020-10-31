@@ -54,11 +54,12 @@ var ganDecoder = null;
              var cubeService = await server.getPrimaryService(GIIKER_SERVICE_UUID);
              var cubeCharacteristic = await cubeService.getCharacteristic(GIIKER_CHARACTERISTIC_UUID);
              await cubeCharacteristic.startNotifications();
+             cubeCharacteristic.addEventListener("characteristicvaluechanged", GiikerNotifications);
          } else if (server.device.name.startsWith("GoCube_")) {
              var cubeService = await server.getPrimaryService(GOCUBE_SERVICE_UUID);
              var cubeCharacteristic = await cubeService.getCharacteristic(GOCUBE_CHARACTERISTIC_UUID);
              await cubeCharacteristic.startNotifications();
-             cubeCharacteristic.addEventListener("characteristicvaluechanged", handleNotifications);
+             cubeCharacteristic.addEventListener("characteristicvaluechanged", GoNotifications);
          } else {
              throw "Unknown device: " + server.device.name;
          }
@@ -71,15 +72,55 @@ var ganDecoder = null;
  }
 
 
- function handleNotifications(event) {
+ function GoNotifications(event) {
+       var val = event.target.value;
+       var len = val.byteLength;
+       console.log(len)
+       console.log(val.getUint8(1))
+       console.log(val.getUint8(3))
         try {
-            var val = event.target.value;
-            var len = val.byteLength;
             if (len = 8 && val.getUint8(1) /* payload len */ == 6) {
               var turn = ["B", "B'", "F", "F'", "U", "U'", "D", "D'", "R", "R'", "L", "L'"][val.getUint8(3)];
-              console.log("Turned " + turn);
+              console.log(turn + ";GO");
             }
         } catch (ex) {
             alert("ERROR (K): " + ex.message);
         }
     }
+
+    var first = true;
+    function GiikerNotifications(event) {
+      try {
+          if (first) {
+              first = false;
+              return; // skip first event
+          }
+          var val = event.target.value;
+          var state = [];
+          if (val.getUint8(18) == 0xa7) { // decrypt
+              var key = [176, 81, 104, 224, 86, 137, 237, 119, 38, 26, 193, 161, 210, 126, 150, 81, 93, 13, 236, 249, 89, 235, 88, 24, 113, 81, 214, 131, 130, 199, 2, 169, 39, 165, 171, 41];
+              var k = val.getUint8(19);
+              var k1 = k >> 4 & 0xf;
+              var k2 = k & 0xf;
+              for (var i = 0; i < 20; i++) {
+                  var v = (val.getUint8(i) + key[i + k1] + key[i + k2]) & 0xff;
+                  state.push(v >> 4 & 0xf);
+                  state.push(v & 0xf);
+              }
+          }
+          else // not encrypted
+          {
+              for (var i = 0; i < 20; i++) {
+                  var v = val.getUint8(i);
+                  state.push(v >> 4 & 0xf);
+                  state.push(v & 0xf);
+              }
+          }
+          var face = state[32];
+          var amount = state[33];
+          var turn = ["?", "B", "D", "L", "U", "R", "F"][face] + ["", "", "2", "'"][amount == 9 ? 2 : amount]; // twistCallback
+          console.log(turn + ";GI");
+      } catch (ex) {
+          alert("ERROR (K): " + ex.message);
+      }
+  }
