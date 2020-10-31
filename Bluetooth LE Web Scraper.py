@@ -49,13 +49,13 @@ dic_gi = {"U": "d",
        "B'": "b"
        }
 
+dics = {"GO": dic_go, "GI": dic_gi}
+
 while True:
     for entry in driver.get_log('browser'):
         print(entry)
         try:
-            entry = str(entry).split('"')[1][7:]
-            entry = entry.replace("\\", "")
-            keyboard.press(dic_go[entry])
-
+            entry = str(entry).split('"')[1].split(";")
+            keyboard.press(dics[entry[1]][entry[0]])
         except:
             pass
