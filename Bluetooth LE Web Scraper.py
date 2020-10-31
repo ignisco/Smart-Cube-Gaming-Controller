@@ -21,22 +21,41 @@ driver = webdriver.Chrome(desired_capabilities=capabilities, executable_path=r'c
 html_location = os.path.dirname(os.path.abspath(__file__)) + "/index.html"
 driver.get(html_location)
 
-dic = {"U": "H",
-       "U'": "E",
-       "R": "L",
-       "R'": "O",
-       "D": " ",
-       "D'": "\b",
-       "F": "f"
+dic_go = {"U": "q",
+       "U'": "w",
+       "D": "e",
+       "D'": "r",
+       "R": "t",
+       "R'": "y",
+       "L": "u",
+       "L'": "i",
+       "F": "o",
+       "F'": "p",
+       "B": "a",
+       "B'": "s"
        }
 
+dic_gi = {"U": "d",
+       "U'": "f",
+       "D": "g",
+       "D'": "h",
+       "R": "j",
+       "R'": "k",
+       "L": "l",
+       "L'": "z",
+       "F": "x",
+       "F'": "c",
+       "B": "v",
+       "B'": "b"
+       }
 
 while True:
     for entry in driver.get_log('browser'):
+        print(entry)
         try:
             entry = str(entry).split('"')[1][7:]
             entry = entry.replace("\\", "")
-            keyboard.press(dic[entry])
+            keyboard.press(dic_go[entry])
 
         except:
             pass
