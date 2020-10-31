@@ -56,6 +56,6 @@ while True:
         print(entry)
         try:
             entry = str(entry).split('"')[1].split(";")
-            keyboard.press(dics[entry[1]][entry[0]])
+            keyboard.press(dics[entry[1]][entry[0].replace("\\", "")])
         except:
             pass
