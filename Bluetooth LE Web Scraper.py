@@ -6,7 +6,7 @@ Created on Tue Oct 27 01:55:49 2020
 """
 
 
-import os
+import os, time
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from pynput.keyboard import Key, Controller
@@ -51,11 +51,23 @@ dic_gi = {"U": "d",
 
 dics = {"GO": dic_go, "GI": dic_gi}
 
+pressed_keys = {}
+press_length = 0.1
+
+def updateKeys():
+    for key, val in pressed_keys.copy().items():
+        if time.time() > val + press_length:
+            keyboard.release(key)
+            del pressed_keys[key]
+
 while True:
     for entry in driver.get_log('browser'):
-        print(entry)
         try:
             entry = str(entry).split('"')[1].split(";")
-            keyboard.press(dics[entry[1]][entry[0].replace("\\", "")])
+            key = dics[entry[1]][entry[0].replace("\\", "")]
+            keyboard.press(key)
+            pressed_keys[key] = time.time()
         except:
             pass
+
+    updateKeys()
