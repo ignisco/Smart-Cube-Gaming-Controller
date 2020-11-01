@@ -7,11 +7,9 @@ Created on Tue Oct 27 01:55:49 2020
 
 
 import os, time
+from DirectInput import press_key, release_key, CHAR_MAP
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from pynput.keyboard import Key, Controller
-
-keyboard = Controller()
 
 capabilities = DesiredCapabilities.CHROME
 capabilities['goog:loggingPrefs'] = { 'browser':'ALL' }
@@ -45,6 +43,21 @@ dic_go = {"U": Key("a", True, cancel_keys=["a", "d"]),
        # "B'": "s"
        }
 
+sekiro = {
+        "U": Key("d", True, cancel_keys=["a", "d", "l"]),
+        "U'": Key("a", True, cancel_keys=["a", "d", "l"]),
+        "D": Key("r", False, press_length=0.1),
+        "D'": Key("x", False, press_length=0.1),
+        "R": Key("w", True, cancel_keys=["s", "w", "l"]),
+        "R'": Key("s", True, cancel_keys=["s", "w", "l"]),
+        "L": Key("l", False, press_length=0.1),
+        "L'": Key("space", False, press_length=0.1),
+        "F": Key("i", False, press_length=0.1),
+        "F'": Key("o", False, press_length=0.1),
+        "B": Key("o", True, cancel_keys=["o", "i", "l"]),
+        "B'": Key("n", True, cancel_keys=["n"]),
+        }
+
 dic_gi = {"U": Key("j", True, cancel_keys=["j", "l"]),
        "U'": Key("l", True, cancel_keys=["j", "l"]),
        "D": down2,
@@ -67,25 +80,25 @@ def updateKeys():
     for key, val in pressed_keys.copy().items():
         if not key.toggle:
             if time.time() > val + key.press_length:
-                keyboard.release(key.value)
+                release_key(CHAR_MAP[key.value])
                 del pressed_keys[key]
 
 while True:
     for entry in driver.get_log('browser'):
         try:
             entry = str(entry).split('"')[1].split(";")
-            new_key = dics[entry[1]][entry[0].replace("\\", "")]
+            new_key = sekiro[entry[0].replace("\\", "")]
             old_pressed_keys = pressed_keys.copy()  # Used to prevent toggle key from toggling itself off immediately
             pressed_keys[new_key] = time.time()
 
             # Check if new_key is in cancel_keys of already toggled keys
             for key in old_pressed_keys:
                 if new_key.value in key.cancel_keys:
-                    keyboard.release(key.value)
+                    release_key(CHAR_MAP[key.value])
                     del pressed_keys[key]
 
             if new_key not in old_pressed_keys:
-                keyboard.press(new_key.value)
+                press_key(CHAR_MAP[new_key.value])
         except:
             pass
 

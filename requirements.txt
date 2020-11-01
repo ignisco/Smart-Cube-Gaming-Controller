@@ -1,0 +1,4 @@
+# Python modules required for program to run
+# Install using "pip install -r {path to requirements.txt}"
+pypiwin32
+selenium
