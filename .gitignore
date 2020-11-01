@@ -2,7 +2,5 @@
 
 *.log
 *.bat
-extractor.py
-*.txt
-!required_python_modules.txt
+_gitignore
 __pycache__

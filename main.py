@@ -7,7 +7,7 @@ Created on Tue Oct 27 01:55:49 2020
 
 
 import os, time
-from DirectInput import press_key, release_key, CHAR_MAP
+from directinput import press_key, release_key, CHAR_MAP
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
