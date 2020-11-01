@@ -4,5 +4,5 @@
 *.bat
 extractor.py
 *.txt
-!requirements.txt
+!required_python_modules.txt
 __pycache__
