@@ -2,3 +2,7 @@
 
 *.log
 *.bat
+extractor.py
+*.txt
+!requirements.txt
+__pycache__
